@@ -270,8 +270,16 @@ def main(cfg : DictConfig):
             # Make the edges
             labels, edges, edge_image, captions = make_vlm_edges_and_captions(image, curr_det, obj_classes, detection_class_labels, det_exp_vis_path, color_path, cfg.make_edges, openai_client)
 
-            image_crops, image_feats, text_feats = compute_clip_features_batched(
-                image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device)
+            # image_crops, image_feats, text_feats = compute_clip_features_batched(
+            #     image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device)
+            
+            # fix bugs: RuntimeError: torch.cat(): expected a non-empty list of Tensors. Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+            # the reason is that the image_crops is empty, so we need to check if the detections are empty
+            if len(curr_det.xyxy) == 0:
+                image_crops, image_feats, text_feats = [], np.array([]), np.array([])
+            else:
+                image_crops, image_feats, text_feats = compute_clip_features_batched(
+                    image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device)
 
             # increment total object detections
             tracker.increment_total_detections(len(curr_det.xyxy))
