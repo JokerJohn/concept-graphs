@@ -275,6 +275,7 @@ def main(cfg : DictConfig):
             
             # fix bugs: RuntimeError: torch.cat(): expected a non-empty list of Tensors. Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
             # the reason is that the image_crops is empty, so we need to check if the detections are empty
+            # this bugs can be reproduced in the Replica dataset sequence `office0`
             if len(curr_det.xyxy) == 0:
                 image_crops, image_feats, text_feats = [], np.array([]), np.array([])
             else:
