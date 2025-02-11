@@ -94,7 +94,7 @@ from conceptgraph.slam.mapping import (
     match_detections_to_objects,
     merge_obj_matches
 )
-from conceptgraph.utils.model_utils import compute_clip_features_batched
+from conceptgraph.utils.model_utils import compute_clip_features_batch_size, compute_clip_features_batched
 from conceptgraph.utils.general_utils import get_vis_out_path, cfg_to_dict, check_run_detections
 
 
@@ -279,8 +279,11 @@ def main(cfg : DictConfig):
             if len(curr_det.xyxy) == 0:
                 image_crops, image_feats, text_feats = [], np.array([]), np.array([])
             else:
-                image_crops, image_feats, text_feats = compute_clip_features_batched(
-                    image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device)
+                # image_crops, image_feats, text_feats = compute_clip_features_batched(
+                #     image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device)
+                # set your batch size to reduce memory usage
+                image_crops, image_feats, text_feats = compute_clip_features_batch_size(
+                    image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device, batch_size=2)
 
             # increment total object detections
             tracker.increment_total_detections(len(curr_det.xyxy))
